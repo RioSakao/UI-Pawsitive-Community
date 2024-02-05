@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Custom styles for the timeline */
+.timeline-container {
+  max-width: 1000px;
+  margin: auto;
+}
