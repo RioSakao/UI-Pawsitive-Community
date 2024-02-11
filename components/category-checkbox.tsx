@@ -3,13 +3,15 @@ import React from 'react';
 
 interface CheckBoxProps {
     label: string;
+    checked: boolean;
+    onChange: () => void;
 }
 
-const Checkbox: React.FC<CheckBoxProps> = ({ label }) => {
+const Checkbox: React.FC<CheckBoxProps> = ({ label, checked, onChange}) => {
     return (
       <div className="checkbox-wrapper">
         <label>
-          <input type="checkbox" />
+          <input type="checkbox" checked={checked} onChange={onChange}/>
           <span>{label}</span>
         </label>
       </div>
