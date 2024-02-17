@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Checkbox from './category-checkbox';
 import FileUploadForm from "@/components/image-upload-form";
 import { get_data, post_data } from './api/timeline';
+import axios from 'axios';
 
 
 interface PostFormProps {
@@ -11,7 +12,10 @@ interface PostFormProps {
 }
 
 interface CheckboxState {
-  [key: string]: boolean;
+  missing: boolean,
+  foster: boolean,
+  adoption:boolean,
+  general: boolean,
 }
 
 interface PostData {
@@ -21,8 +25,21 @@ interface PostData {
   image: string;
 }
 
+const initialCheckboxState = {
+  missing: false,
+  foster: false,
+  adoption: false,
+  general: false,
+};
+
+const initialPostData = {
+  username: '',
+  categories: { ...initialCheckboxState },
+  comment: '',
+  image: '',
+};
+
 const PostForm: React.FC<PostFormProps> = ({ onAddPost }) => {
-  const [content, setContent] = useState('');
   const [isExpanded, setExpanded] = useState(false);
   const [checkboxState, setCheckboxState] = useState<CheckboxState>({
     missing: false,
@@ -38,30 +55,36 @@ const PostForm: React.FC<PostFormProps> = ({ onAddPost }) => {
     image:'',
   });
 
-  const handleCheckboxChange = (checkboxName: string) => {
-    setCheckboxState((prevState) => ({
-      ...prevState,
-      [checkboxName]: !prevState[checkboxName],
-    }));
-  };
-
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await post_data({ postData }); 
-
-      setContent('');
-
+      const JSONobj =  JSON.stringify(postData);
+      console.log(JSONobj)
+      axios.post('http://127.0.0.1:8000/api/timeline', JSONobj), {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+      // const res = await axios.post('http://127.0.0.1:8000/api/timeline', JSONobj);
       setExpanded(false);
     } catch (error) {
       // Handle error
       console.error('Error posting data:', error);
     }
   };
+  const handleCancel = () => {
+    setCheckboxState(initialCheckboxState);
+    setPostData(initialPostData);
+    // Collapse the form
+    setExpanded((prevExpanded) => !prevExpanded);
+  };
 
   return (
     <div className="mb-4">
-      <button onClick={() => setExpanded(!isExpanded)} className="mb-2 px-4 py-2 bg-blue-500 text-white rounded-md focus:outline-none">
+      <button
+        onClick={() => handleCancel()}
+        className="mb-2 px-4 py-2 bg-blue-500 text-white rounded-md focus:outline-none"
+      >
         {isExpanded ? 'Cancel' : 'New Post'}
       </button>
       {isExpanded && (
@@ -70,23 +93,75 @@ const PostForm: React.FC<PostFormProps> = ({ onAddPost }) => {
           <div className="categories">
             <Checkbox
             label="Missing"
-            checked={checkboxState['missing']}
-            onChange={() => handleCheckboxChange('missing')}
+            name="missing"
+            checked={checkboxState.missing}
+            onChange={(isChecked) => {
+              setCheckboxState((prevState) => ({
+                ...prevState,
+                missing: isChecked,
+              }));
+              setPostData((prevData) => ({
+                ...prevData,
+                categories: {
+                  ...prevData.categories,
+                  missing: isChecked,
+                },
+              }));
+            }}
             />
           <Checkbox
             label="Foster"
-            checked={checkboxState['foster']}
-            onChange={() => handleCheckboxChange('foster')}
+            name="foster"
+            checked={checkboxState.foster}
+            onChange={(isChecked) => {
+              setCheckboxState((prevState) => ({
+                ...prevState,
+                foster: isChecked,
+              }));
+              setPostData((prevData) => ({
+                ...prevData,
+                categories: {
+                  ...prevData.categories,
+                  foster: isChecked,
+                },
+              }));
+            }}
           />
           <Checkbox
             label="Adoption"
-            checked={checkboxState['adoption']}
-            onChange={() => handleCheckboxChange('adoption')}
+            name="adoption"
+            checked={checkboxState.adoption}
+            onChange={(isChecked) => {
+              setCheckboxState((prevState) => ({
+                ...prevState,
+                adoption: isChecked,
+              }));
+              setPostData((prevData) => ({
+                ...prevData,
+                categories: {
+                  ...prevData.categories,
+                  adoption: isChecked,
+                },
+              }));
+            }}
           />
           <Checkbox
             label="General"
-            checked={checkboxState['general']}
-            onChange={() => handleCheckboxChange('general')}
+            name="general"
+            checked={checkboxState.general}
+            onChange={(isChecked) => {
+              setCheckboxState((prevState) => ({
+                ...prevState,
+                general: isChecked,
+              }));
+              setPostData((prevData) => ({
+                ...prevData,
+                categories: {
+                  ...prevData.categories,
+                  general: isChecked,
+                },
+              }));
+            }}
           />
           </div>
           <textarea
@@ -94,7 +169,7 @@ const PostForm: React.FC<PostFormProps> = ({ onAddPost }) => {
             value={postData.comment}
             onChange={(e) => setPostData({ ...postData, comment: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none"
-            rows={3}
+            rows={5}
           ></textarea>
           <FileUploadForm />
           <button
