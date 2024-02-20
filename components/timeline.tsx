@@ -1,61 +1,86 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Post from './post';
 import SearchBar from './search-bar';
 import PostForm from './new-post';
+import axios from 'axios'
+
 
 interface Event {
+  id: number;
   username: string;
-  avatar: string;
-  content: string;
-  date: string;
+  missing: boolean;
+  foster: boolean;
+  adoption: boolean;
+  general: boolean;
+  comment: string;
+  images: string;
+  created_at: string;
 }
 
 interface TimelineProps {
   events: Event[];
 }
 
+export const getTimelinePosts = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/api/timeline');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching timeline posts:', error);
+    throw error; // Re-throw the error for handling in your components
+  }
+};
 const Timeline: React.FC<TimelineProps> = ({ events }) => {
   const [filteredEvents, setFilteredEvents] = useState<Event[]>(events);
+  const [timelinePosts, setTimelinePosts] = useState<Event[]>([]);
+
+  useEffect(() => {
+    const fetchTimelinePosts = async () => {
+      try {
+        const posts = await getTimelinePosts();
+        setTimelinePosts(posts);
+      } catch (error) {
+        // Handle the error as needed
+      }
+    };
+
+    fetchTimelinePosts();
+    // Set up interval to fetch data every X seconds
+    const intervalId = setInterval(fetchTimelinePosts, 60000); // Fetch data every 60 seconds
+
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array to fetch data only once when the component mounts
+
 
   const handleSearch = (searchQuery: string) => {
     const filtered = events.filter((event) =>
-      event.content.toLowerCase().includes(searchQuery.toLowerCase())
+      event.comment.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredEvents(filtered);
   };
-
-  const handleAddPost = (content: string) => {
-    const newPost: Event = {
-      username: 'CurrentUser', // Replace with actual user data
-      avatar: '', // Replace with actual user avatar URL
-      content,
-      date: new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }),
-    };
-
-    setFilteredEvents([newPost, ...filteredEvents]);
-  };
-
   return (
     <div>
       <SearchBar onSearch={handleSearch} />
       <div className="timeline-container">
-        {filteredEvents.map((event, index) => (
+        {timelinePosts.slice().reverse().map((post) => (
           <Post
-            key={index}
-            username={event.username}
-            avatar={event.avatar}
-            content={event.content}
-            date={event.date}
+            key={post.id}
+            id={post.id}
+            username={post.username}
+            missing={post.missing}
+            foster={post.foster}
+            adoption={post.adoption}
+            general={post.general}
+            comment={post.comment}
+            images={post.images}
+            createdAt={post.created_at}
           />
         ))}
       </div>
       <div className="fixed bottom-4 right-4">
-        <PostForm onAddPost={handleAddPost} />
+        <PostForm />
       </div>
     </div>
   );

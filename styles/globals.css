@@ -6,3 +6,12 @@
   max-width: 1000px;
   margin: auto;
 }
+.category-label {
+  display: inline-block;
+  background-color: #f0f0f0; /* Light grey color */
+  color: #333; /* Text color */
+  padding: 0.5rem;
+  border-radius: 0.25rem; /* Adds rounded corners */
+  margin-right: 0.5rem; /* Adjust margin as needed */
+  font-size: 0.875rem; /* Adjust font size as needed */
+}

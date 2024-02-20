@@ -3,12 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import Checkbox from './category-checkbox';
 import FileUploadForm from "@/components/image-upload-form";
-import { get_data, post_data } from './api/timeline';
 import axios from 'axios';
 
 
 interface PostFormProps {
-  onAddPost: (content: string) => void;
+  onAddPost: () => void;
 }
 
 interface CheckboxState {
@@ -39,7 +38,8 @@ const initialPostData = {
   image: '',
 };
 
-const PostForm: React.FC<PostFormProps> = ({ onAddPost }) => {
+
+const PostForm: React.FC = () => {
   const [isExpanded, setExpanded] = useState(false);
   const [checkboxState, setCheckboxState] = useState<CheckboxState>({
     missing: false,
