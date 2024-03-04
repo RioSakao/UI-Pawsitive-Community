@@ -1,7 +1,11 @@
 // components/Post.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
+interface Comments {
+  username: string;
+  comment: string;
+}
 interface PostProps {
   id: number;
   username: string;
@@ -9,9 +13,10 @@ interface PostProps {
   foster: boolean;
   adoption: boolean;
   general: boolean;
-  comment: string;
+  content: string;
   images: string;
   createdAt: string;
+  comments: Comments[];
 }
 
 const Post: React.FC<PostProps> = ({
@@ -21,10 +26,28 @@ const Post: React.FC<PostProps> = ({
   foster,
   adoption,
   general,
-  comment,
+  content,
   images,
   createdAt,
+  comments = [],
 }) => {
+
+  const [newComment, setNewComment] = useState<Comments>({ username: '', comment: '' });
+  const handleCommentChange = (e: React.FormEvent<HTMLInputElement>) => {
+    const { name, value } = e.currentTarget;
+    setNewComment((prevComment) => ({
+      ...prevComment,
+      [name]: value,
+    }));
+  };
+
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Add new comment to the comments array
+    // Note: You should replace this logic with your actual method of submitting comments to the server.
+    // This is just an example.
+    setNewComment({ username: '', comment: '' });
+  };
   const date = new Date(createdAt)
   const formattedDate = date.toLocaleString();
   return (
@@ -39,7 +62,7 @@ const Post: React.FC<PostProps> = ({
           <p className="text-gray-600 text-sm">{formattedDate}</p>
         </div>
       </div>
-      <p className="mt-4">{comment}</p>
+      <p className="mt-4">{content}</p>
       {/* Add logic to display images if available */}
       {images && (
         <div className="my-4">
@@ -53,6 +76,34 @@ const Post: React.FC<PostProps> = ({
         {adoption && <span className="category-label">Adoption</span>}
         {general && <span className="category-label">General</span>}
       </div>
+      <div className="mt-4">
+        <form onSubmit={handleCommentSubmit}>
+          <input
+            type="text"
+            name="username"
+            placeholder="Your Name"
+            value={newComment.username}
+            onChange={handleCommentChange}
+            className="mr-2 p-1 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
+            name="content"
+            placeholder="Leave a comment"
+            value={newComment.comment}
+            onChange={handleCommentChange}
+            className="p-1 border border-gray-300 rounded"
+          />
+          <button type="submit" className="bg-blue-500 text-white p-1 rounded">Comment</button>
+        </form>
+      </div>
+      {comments.map((comment, index) => (
+          <div key={index} className="border-t pt-2 mt-2">
+            <p className="text-gray-600 text-sm">
+              <span className="font-bold">{comment.username}:</span> {comment.comment}
+            </p>
+          </div>
+        ))}
     </div>
   );
 };

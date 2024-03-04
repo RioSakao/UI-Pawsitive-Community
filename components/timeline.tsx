@@ -6,6 +6,11 @@ import PostForm from './new-post';
 import axios from 'axios'
 
 
+interface Comments {
+  username: string;
+  comment: string;
+}
+
 interface Event {
   id: number;
   username: string;
@@ -13,13 +18,10 @@ interface Event {
   foster: boolean;
   adoption: boolean;
   general: boolean;
-  comment: string;
+  content: string;
   images: string;
   created_at: string;
-}
-
-interface TimelineProps {
-  events: Event[];
+  comments: Comments[];
 }
 
 export const getTimelinePosts = async () => {
@@ -31,9 +33,10 @@ export const getTimelinePosts = async () => {
     throw error; // Re-throw the error for handling in your components
   }
 };
-const Timeline: React.FC<TimelineProps> = ({ events }) => {
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(events);
+const Timeline: React.FC = () => {
+  // const [filteredEvents, setFilteredEvents] = useState<Event[]>(events);
   const [timelinePosts, setTimelinePosts] = useState<Event[]>([]);
+  const [reply, setReply] = useState([]);
 
   useEffect(() => {
     const fetchTimelinePosts = async () => {
@@ -54,11 +57,12 @@ const Timeline: React.FC<TimelineProps> = ({ events }) => {
   }, []); // Empty dependency array to fetch data only once when the component mounts
 
 
+
   const handleSearch = (searchQuery: string) => {
-    const filtered = events.filter((event) =>
-      event.comment.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredEvents(filtered);
+    // const filtered = events.filter((event) =>
+    //   event.comment.toLowerCase().includes(searchQuery.toLowerCase())
+    // );
+    // setFilteredEvents(filtered);
   };
   return (
     <div>
@@ -73,9 +77,10 @@ const Timeline: React.FC<TimelineProps> = ({ events }) => {
             foster={post.foster}
             adoption={post.adoption}
             general={post.general}
-            comment={post.comment}
+            content={post.content}
             images={post.images}
             createdAt={post.created_at}
+            comments={post.comments}
           />
         ))}
       </div>
