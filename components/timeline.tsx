@@ -6,11 +6,6 @@ import PostForm from './new-post';
 import axios from 'axios'
 
 
-interface Comments {
-  username: string;
-  comment: string;
-}
-
 interface Event {
   id: number;
   username: string;
@@ -21,7 +16,6 @@ interface Event {
   content: string;
   images: string;
   created_at: string;
-  comments: Comments[];
 }
 
 export const getTimelinePosts = async () => {
@@ -36,7 +30,6 @@ export const getTimelinePosts = async () => {
 const Timeline: React.FC = () => {
   // const [filteredEvents, setFilteredEvents] = useState<Event[]>(events);
   const [timelinePosts, setTimelinePosts] = useState<Event[]>([]);
-  const [reply, setReply] = useState([]);
 
   useEffect(() => {
     const fetchTimelinePosts = async () => {
@@ -80,7 +73,6 @@ const Timeline: React.FC = () => {
             content={post.content}
             images={post.images}
             createdAt={post.created_at}
-            comments={post.comments}
           />
         ))}
       </div>

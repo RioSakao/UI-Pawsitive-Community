@@ -6,10 +6,6 @@ import FileUploadForm from "@/components/image-upload-form";
 import axios from 'axios';
 
 
-interface PostFormProps {
-  onAddPost: () => void;
-}
-
 interface CheckboxState {
   missing: boolean,
   foster: boolean,
@@ -18,9 +14,10 @@ interface CheckboxState {
 }
 
 interface PostData {
+  id: number;
   username: string;
   categories: CheckboxState; 
-  comment: string;
+  content: string;
   image: string;
 }
 
@@ -32,14 +29,17 @@ const initialCheckboxState = {
 };
 
 const initialPostData = {
+  id: 0,
   username: '',
   categories: { ...initialCheckboxState },
-  comment: '',
+  content: '',
   image: '',
 };
 
 
+
 const PostForm: React.FC = () => {
+  const [globalVariable, setGlobalVariable] = useState(0);
   const [isExpanded, setExpanded] = useState(false);
   const [checkboxState, setCheckboxState] = useState<CheckboxState>({
     missing: false,
@@ -49,15 +49,17 @@ const PostForm: React.FC = () => {
   });
   const [postData, setPostData] = useState<PostData>({
     // Initialize postData with empty values
+    id: 0,
     username: '',
     categories: { ...checkboxState },
-    comment: '',
+    content: '',
     image:'',
   });
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setPostData({ ...postData, id: globalVariable })
       const JSONobj =  JSON.stringify(postData);
       console.log(JSONobj)
       axios.post('http://127.0.0.1:8000/api/timeline', JSONobj), {
@@ -67,6 +69,7 @@ const PostForm: React.FC = () => {
       };
       // const res = await axios.post('http://127.0.0.1:8000/api/timeline', JSONobj);
       setExpanded(false);
+      setGlobalVariable((prevGlobalVariable) => prevGlobalVariable + 1);
     } catch (error) {
       // Handle error
       console.error('Error posting data:', error);
@@ -166,8 +169,8 @@ const PostForm: React.FC = () => {
           </div>
           <textarea
             placeholder="What's on your mind?"
-            value={postData.comment}
-            onChange={(e) => setPostData({ ...postData, comment: e.target.value })}
+            value={postData.content}
+            onChange={(e) => setPostData({ ...postData, content: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none"
             rows={5}
           ></textarea>

@@ -15,3 +15,12 @@
   margin-right: 0.5rem; /* Adjust margin as needed */
   font-size: 0.875rem; /* Adjust font size as needed */
 }
+
+
+.comment-text {
+  margin-top: 5px;
+  color: #555;
+  padding: 10px; /* Adding padding for better visual appearance */
+  border: 1px solid #ddd; /* Adding a 1px solid border with a light gray color */
+  border-radius: 5px; /* Adding border-radius for rounded corners */
+}

@@ -1,10 +1,17 @@
-// components/Post.tsx
-import React, { useState, useEffect } from 'react';
+import useState from 'react-usestateref';
 import Image from 'next/image';
+import axios from 'axios';
+import { useEffect } from 'react';
 
 interface Comments {
-  username: string;
-  comment: string;
+  id: number;
+  text: string;
+}
+
+interface ReturnComments {
+  id: number;
+  post: number;
+  text: string;
 }
 interface PostProps {
   id: number;
@@ -16,8 +23,17 @@ interface PostProps {
   content: string;
   images: string;
   createdAt: string;
-  comments: Comments[];
 }
+
+export const getTimelineComments = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/api/timeline/comments');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching timeline comments:', error);
+    throw error; // Re-throw the error for handling in your components
+  }
+};
 
 const Post: React.FC<PostProps> = ({
   id,
@@ -29,25 +45,43 @@ const Post: React.FC<PostProps> = ({
   content,
   images,
   createdAt,
-  comments = [],
 }) => {
 
-  const [newComment, setNewComment] = useState<Comments>({ username: '', comment: '' });
-  const handleCommentChange = (e: React.FormEvent<HTMLInputElement>) => {
-    const { name, value } = e.currentTarget;
-    setNewComment((prevComment) => ({
-      ...prevComment,
-      [name]: value,
-    }));
+  const [timelineComment, setTimelineComment] = useState<ReturnComments[]>([]);
+  useEffect(() => {
+    const fetchTimelineComments = async () => {
+      try {
+        const timeline_comments = await getTimelineComments();
+        setTimelineComment(timeline_comments)
+      } catch (error) {
+        // Handle the error as needed
+      }
+    };
+
+    fetchTimelineComments();
+    // Set up interval to fetch data every X seconds
+    const intervalId = setInterval(fetchTimelineComments, 60000); // Fetch data every 60 seconds
+
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
+  });
+
+  const [Comment, setComment, CommentRef] = useState<Comments>({ id: 0, text: '' });
+  const handleCommentSubmit = () => {
+    try {
+      Comment.id = id
+      const JSONobj =  JSON.stringify(Comment);
+      axios.post('http://127.0.0.1:8000/api/timeline/comments', JSONobj), {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+    } catch (error) {
+      console.error('Error posting data:', error);
+    } 
+    setComment({ id: 0 , text: '' });
   };
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Add new comment to the comments array
-    // Note: You should replace this logic with your actual method of submitting comments to the server.
-    // This is just an example.
-    setNewComment({ username: '', comment: '' });
-  };
   const date = new Date(createdAt)
   const formattedDate = date.toLocaleString();
   return (
@@ -80,30 +114,20 @@ const Post: React.FC<PostProps> = ({
         <form onSubmit={handleCommentSubmit}>
           <input
             type="text"
-            name="username"
-            placeholder="Your Name"
-            value={newComment.username}
-            onChange={handleCommentChange}
-            className="mr-2 p-1 border border-gray-300 rounded"
-          />
-          <input
-            type="text"
             name="content"
             placeholder="Leave a comment"
-            value={newComment.comment}
-            onChange={handleCommentChange}
+            value={Comment.text}
+            onChange={(e) => setComment({ ...Comment, text: e.target.value })}
             className="p-1 border border-gray-300 rounded"
           />
           <button type="submit" className="bg-blue-500 text-white p-1 rounded">Comment</button>
         </form>
       </div>
-      {comments.map((comment, index) => (
-          <div key={index} className="border-t pt-2 mt-2">
-            <p className="text-gray-600 text-sm">
-              <span className="font-bold">{comment.username}:</span> {comment.comment}
-            </p>
-          </div>
+      <ul >
+        {timelineComment.reverse().map((comment) => (
+          (id === comment.post ? <li className="comment-text" key={comment.id}>{comment.text}</li> : null)
         ))}
+      </ul>
     </div>
   );
 };
