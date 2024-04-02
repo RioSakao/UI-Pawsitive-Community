@@ -2,15 +2,19 @@ import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { signupFields } from "./constants/formFields";
 import FormAction from "./form-action";
 import Input from "./input";
+import axios from 'axios';
+import Cookies from 'js-cookie'; // Import the js-cookie library
 
 interface FieldState {
   [key: string]: string;
 }
 
-const fields = signupFields;
-let fieldsState: FieldState = {};
 
-fields.forEach((field) => (fieldsState[field.id] = ''));
+const fields = signupFields
+let fieldsState: FieldState = {}
+
+
+fields.forEach((field) => (fieldsState[field.id] = ''))
 
 export default function Signup() {
   const [signupState, setSignupState] = useState(fieldsState);
@@ -22,11 +26,23 @@ export default function Signup() {
     e.preventDefault();
     console.log(signupState);
     createAccount();
+    setSignupState(fieldsState)
   };
 
   // Handle Signup API Integration here
-  const createAccount = () => {
-    // Implementation of signup logic
+  const createAccount = async () => {
+    try {
+      const csrftoken = Cookies.get('csrftoken');
+      const JSONobj = JSON.stringify(signupState)
+      console.log(JSONobj)
+      axios.post('http://127.0.0.1:8000/api/create', JSONobj ),{
+        headers: {
+          'Content-Type': 'application/json',
+          // 'X-CSRFToken': csrftoken
+        }, };
+    } catch(error) {
+      console.error(error)
+    }
   };
 
   return (

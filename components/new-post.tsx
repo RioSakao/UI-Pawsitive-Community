@@ -2,8 +2,9 @@
 // components/PostForm.tsx
 import React, { useEffect, useState } from 'react';
 import Checkbox from './category-checkbox';
-import FileUploadForm from "@/components/image-upload-form";
 import axios from 'axios';
+import CustomFileSelector from "./choose-image";
+import ImagePreview from "./image-preview";
 
 
 interface CheckboxState {
@@ -18,7 +19,7 @@ interface PostData {
   username: string;
   categories: CheckboxState; 
   content: string;
-  image: string;
+  image: File[];
 }
 
 const initialCheckboxState = {
@@ -33,14 +34,13 @@ const initialPostData = {
   username: '',
   categories: { ...initialCheckboxState },
   content: '',
-  image: '',
+  image: [],
 };
 
-
-
 const PostForm: React.FC = () => {
-  const [globalVariable, setGlobalVariable] = useState(0);
+ 
   const [isExpanded, setExpanded] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
   const [checkboxState, setCheckboxState] = useState<CheckboxState>({
     missing: false,
     foster: false,
@@ -53,15 +53,20 @@ const PostForm: React.FC = () => {
     username: '',
     categories: { ...checkboxState },
     content: '',
-    image:'',
+    image:[],
   });
-
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      //convert `FileList` to `File[]`
+      const _files = Array.from(e.target.files);
+      setImages(_files);
+    }
+  };
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setPostData({ ...postData, id: globalVariable })
+      // setPostData({ ...postData, id: globalVariable })
       const JSONobj =  JSON.stringify(postData);
-      console.log(JSONobj)
       axios.post('http://127.0.0.1:8000/api/timeline', JSONobj), {
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +74,6 @@ const PostForm: React.FC = () => {
       };
       // const res = await axios.post('http://127.0.0.1:8000/api/timeline', JSONobj);
       setExpanded(false);
-      setGlobalVariable((prevGlobalVariable) => prevGlobalVariable + 1);
     } catch (error) {
       // Handle error
       console.error('Error posting data:', error);
@@ -174,7 +178,14 @@ const PostForm: React.FC = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none"
             rows={5}
           ></textarea>
-          <FileUploadForm />
+          {/* <FileUploadForm /> */}
+          <form className="w-full">
+            <CustomFileSelector
+            accept="image/png, image/jpeg"
+            onChange={handleFileSelected}
+            />
+            <ImagePreview images={images} />
+            </form>
           <button
             type="submit"
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"

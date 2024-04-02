@@ -21,7 +21,7 @@ interface PostProps {
   adoption: boolean;
   general: boolean;
   content: string;
-  images: string;
+  images: File[];
   createdAt: string;
 }
 
@@ -100,8 +100,10 @@ const Post: React.FC<PostProps> = ({
       {/* Add logic to display images if available */}
       {images && (
         <div className="my-4">
-          <Image src={images} alt="Post Images" width={500} height={300} />
-        </div>
+        {images.map((imageFile, index) => (
+          <Image key={index} src={URL.createObjectURL(imageFile)} alt={`Post Image ${index + 1}`} width={500} height={300} />
+        ))}
+      </div>
       )}
       {/* Display categories (missing, foster, adoption, general) */}
       <div className="flex items-center">

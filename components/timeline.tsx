@@ -14,7 +14,7 @@ interface Event {
   adoption: boolean;
   general: boolean;
   content: string;
-  images: string;
+  images: File[];
   created_at: string;
 }
 
