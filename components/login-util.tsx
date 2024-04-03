@@ -4,6 +4,7 @@ import Input from "./input";
 import FormAction from "./form-action";
 import FormExtra from "./form-extra";
 import React, { FormEvent, ChangeEvent } from 'react';
+import axios from 'axios';
 
 interface FieldState {
     [key: string]: string;
@@ -27,7 +28,17 @@ export default function Login(){
 
     //Handle Login API Integration here
     const authenticateUser = () =>{
-
+        try {
+            const JSONobj = JSON.stringify(loginState)
+            console.log(JSONobj)
+            axios.post('http://127.0.0.1:8000/api/login', JSONobj ),{
+              headers: {
+                'Content-Type': 'application/json',
+                // 'X-CSRFToken': csrftoken
+              }, };
+          } catch(error) {
+            console.error(error)
+          }
     }
 
     return (
