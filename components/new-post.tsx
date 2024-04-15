@@ -41,6 +41,7 @@ const initialPostData = {
 const PostForm: React.FC = () => {
  
   const [isExpanded, setExpanded] = useState(false);
+  const isLoggedIn = useBearStore(state => state.username !== "");
   const [images, setImages] = useState<File[]>([]);
   const [checkboxState, setCheckboxState] = useState<CheckboxState>({
     missing: false,
@@ -87,6 +88,12 @@ const PostForm: React.FC = () => {
   const handleCancel = () => {
     setCheckboxState(initialCheckboxState);
     setPostData(initialPostData);
+    if (!isLoggedIn) {
+      // Show error popup or perform some other action to indicate that the user must log in
+      alert("You must log in to create a post.");
+      // setExpanded((prevExpanded) => !prevExpanded);
+      // return;
+    }
     // Collapse the form
     setExpanded((prevExpanded) => !prevExpanded);
   };
@@ -99,7 +106,7 @@ const PostForm: React.FC = () => {
       >
         {isExpanded ? 'Cancel' : 'New Post'}
       </button>
-      {isExpanded && (
+      {isExpanded && paw !== "" && (
         <form onSubmit={handleSubmit}>
           {/* <input type="checkbox" /> */}
           <div className="categories">

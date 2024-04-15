@@ -17,6 +17,7 @@ interface FieldState {
 
 interface BearState {
   username: string;
+  resetUsername: () => void; 
 }
 
 export const useBearStore = create<BearState>()(
@@ -24,13 +25,17 @@ export const useBearStore = create<BearState>()(
     persist(
       (set) => ({
         username: "",
+        // Function to reset the username
+        resetUsername: () => {
+          set({ username: "" });
+        },
       }),
       {
         name: 'bear-storage',
       },
     ),
   ),
-)
+);
 
 const fields = loginFields;
 let fieldsState: FieldState = {};

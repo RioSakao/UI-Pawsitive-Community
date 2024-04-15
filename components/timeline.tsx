@@ -4,7 +4,7 @@ import Post from './post';
 import SearchBar from './search-bar';
 import PostForm from './new-post';
 import axios from 'axios'
-
+import { useBearStore } from './login-util';
 
 interface Event {
   id: number;
@@ -48,6 +48,35 @@ const Timeline: React.FC = () => {
     // Clean up interval on component unmount
     return () => clearInterval(intervalId);
   }, []); // Empty dependency array to fetch data only once when the component mounts
+
+
+  // erase user's login state in 24 hours 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Store the current timestamp in localStorage when the window is about to close
+      localStorage.setItem('lastUnloadTime', Date.now().toString());
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Remove event listener when the component unmounts
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []); // Empty dependency array to ensure this effect runs only once when the component mounts
+
+  useEffect(() => {
+    // Check if the stored timestamp is older than 24 hours
+    const storedUnloadTime = localStorage.getItem('lastUnloadTime');
+    if (storedUnloadTime) {
+      const lastUnloadTime = parseInt(storedUnloadTime, 10);
+      const currentTime = Date.now();
+      if (currentTime - lastUnloadTime >= 24 * 60 * 60 * 1000) {
+        // Clear the username if 24 hours have passed
+        useBearStore.getState().resetUsername();
+      }
+    }
+  }, []);
 
 
 
