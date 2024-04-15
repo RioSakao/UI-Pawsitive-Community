@@ -1,11 +1,11 @@
 'use client'
 // components/PostForm.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Checkbox from './category-checkbox';
 import axios from 'axios';
 import CustomFileSelector from "./choose-image";
 import ImagePreview from "./image-preview";
-
+import { useBearStore } from './login-util';
 
 interface CheckboxState {
   missing: boolean,
@@ -37,6 +37,7 @@ const initialPostData = {
   image: [],
 };
 
+
 const PostForm: React.FC = () => {
  
   const [isExpanded, setExpanded] = useState(false);
@@ -47,9 +48,11 @@ const PostForm: React.FC = () => {
     adoption: false,
     general: false,
   });
+  // const { loginState } = useContext(LoginContext);
   const [postData, setPostData] = useState<PostData>({
     // Initialize postData with empty values
     id: 0,
+    // username: loginState['username'],
     username: '',
     categories: { ...checkboxState },
     content: '',
@@ -57,16 +60,18 @@ const PostForm: React.FC = () => {
   });
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      //convert `FileList` to `File[]`
-      const _files = Array.from(e.target.files);
-      setImages(_files);
+      const selectedFiles = Array.from(e.target.files);
+      setImages(selectedFiles)
+      setPostData({ ...postData, image: images });
     }
   };
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // setPostData({ ...postData, id: globalVariable })
+      console.log(postData.username)
       const JSONobj =  JSON.stringify(postData);
+      console.log(JSONobj);
+      // console.log('Login State:', loginState);
       axios.post('http://127.0.0.1:8000/api/timeline', JSONobj), {
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +90,7 @@ const PostForm: React.FC = () => {
     // Collapse the form
     setExpanded((prevExpanded) => !prevExpanded);
   };
-
+  const paw = useBearStore.getState().username
   return (
     <div className="mb-4">
       <button
@@ -174,7 +179,7 @@ const PostForm: React.FC = () => {
           <textarea
             placeholder="What's on your mind?"
             value={postData.content}
-            onChange={(e) => setPostData({ ...postData, content: e.target.value })}
+            onChange={(e) => setPostData({ ...postData, content: e.target.value, username: paw })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none"
             rows={5}
           ></textarea>

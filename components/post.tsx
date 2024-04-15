@@ -2,16 +2,18 @@ import useState from 'react-usestateref';
 import Image from 'next/image';
 import axios from 'axios';
 import { useEffect } from 'react';
-
+import { useBearStore } from './login-util';
 interface Comments {
   id: number;
   text: string;
+  username: string;
 }
 
 interface ReturnComments {
   id: number;
   post: number;
   text: string;
+  username: string;
 }
 interface PostProps {
   id: number;
@@ -66,7 +68,7 @@ const Post: React.FC<PostProps> = ({
     return () => clearInterval(intervalId);
   });
 
-  const [Comment, setComment, CommentRef] = useState<Comments>({ id: 0, text: '' });
+  const [Comment, setComment, CommentRef] = useState<Comments>({ id: 0, text: '' , username:''});
   const handleCommentSubmit = () => {
     try {
       Comment.id = id
@@ -79,11 +81,12 @@ const Post: React.FC<PostProps> = ({
     } catch (error) {
       console.error('Error posting data:', error);
     } 
-    setComment({ id: 0 , text: '' });
+    setComment({ id: 0 , text: '' , username: ''});
   };
 
   const date = new Date(createdAt)
   const formattedDate = date.toLocaleString();
+  const paw = useBearStore.getState().username
   return (
     <div className="bg-white p-4 my-4 shadow-md rounded-md">
       <div className="flex items-center">
@@ -119,7 +122,7 @@ const Post: React.FC<PostProps> = ({
             name="content"
             placeholder="Leave a comment"
             value={Comment.text}
-            onChange={(e) => setComment({ ...Comment, text: e.target.value })}
+            onChange={(e) => setComment({ ...Comment, text: e.target.value, username: paw })}
             className="p-1 border border-gray-300 rounded"
           />
           <button type="submit" className="bg-blue-500 text-white p-1 rounded">Comment</button>
@@ -127,7 +130,9 @@ const Post: React.FC<PostProps> = ({
       </div>
       <ul >
         {timelineComment.reverse().map((comment) => (
-          (id === comment.post ? <li className="comment-text" key={comment.id}>{comment.text}</li> : null)
+          (id === comment.post ? <li className="comment-text" key={comment.id}>
+            <ul className="font-bold"> @{comment.username} </ul>
+            {comment.text}</li> : null)
         ))}
       </ul>
     </div>
