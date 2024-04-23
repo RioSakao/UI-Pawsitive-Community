@@ -3,13 +3,12 @@ import { loginFields } from "./constants/formFields";
 import Input from "./input";
 import FormAction from "./form-action";
 import FormExtra from "./form-extra";
-import Home from "../app/page"
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import React, { FormEvent } from 'react';
 import axios , { AxiosResponse } from 'axios';
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import type {} from '@redux-devtools/extension' // required for devtools typing
+import Link from 'next/link'
 
 interface FieldState {
   [key: string]: string;
@@ -55,6 +54,7 @@ export default function Login(){
 
     //Handle Login API Integration here
     const authenticateUser = () =>{
+        
         const JSONobj = JSON.stringify(loginState)
         console.log(JSONobj)
         axios.post('http://127.0.0.1:8000/api/login', JSONobj ,{
@@ -64,22 +64,15 @@ export default function Login(){
         }
         }) .then((response: AxiosResponse) => {
             // Handle successful response
-            // console.log('Response Status Code:', response.status);
+            console.log('Response Status Code:', response.status);
             // console.log('Response Data:', response.data);
             if (response.status === 200) {
               console.log('Login successful');
               useBearStore.setState({ username: response.data.username })
               const paw = useBearStore.getState().username
               console.log(paw)
-              // console.log(useBearStore)
-              return(
-                <Router>
-                    <Routes>
-                        <Route path="/" element={<Home />}/>
-                    </Routes>
-                </Router>
-              );
-            //   router.push('/');
+              // return <Link href="/">Dashboard</Link>
+              window.location.href = '/'
             } else {
               console.log('Login failed');
             }
